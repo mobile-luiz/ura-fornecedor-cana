@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>URA Fornecedor Cana — Conexão WhatsApp</title>
+<style>
+  :root {
+    --verde-escuro: #1B4332;
+    --verde-medio: #2D6A4F;
+    --verde-claro: #95D5B2;
+    --dourado: #D4A017;
+    --creme: #F7F5EF;
+    --cinza-texto: #3A3A3A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--verde-escuro);
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: var(--creme);
+    border-radius: 16px;
+    padding: 36px 32px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  h1 {
+    color: var(--verde-escuro);
+    font-size: 22px;
+    margin: 0 0 6px;
+  }
+  p.subtitulo {
+    color: var(--cinza-texto);
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+  .qr-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 260px;
+  }
+  .qr-container img {
+    width: 100%;
+    max-width: 260px;
+    display: block;
+  }
+  .status {
+    margin-top: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+  }
+  .status.aguardando {
+    background: #FCEFC7;
+    color: #8A6D00;
+  }
+  .status.conectado {
+    background: var(--verde-claro);
+    color: var(--verde-escuro);
+  }
+  .status.desconectado,
+  .status.deslogado {
+    background: #F8D7DA;
+    color: #842029;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .instrucoes {
+    text-align: left;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--cinza-texto);
+    line-height: 1.6;
+  }
+  .instrucoes ol { margin: 6px 0 0 18px; padding: 0; }
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #ddd;
+    border-top-color: var(--verde-medio);
+    border-radius: 50%;
+    animation: girar 0.8s linear infinite;
+  }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation-duration: 3s; }
+  }
+  .check {
+    font-size: 56px;
+    color: var(--verde-medio);
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🌾 URA Fornecedor Cana</h1>
+    <p class="subtitulo">Consulta de tonelagem e ATR pelo WhatsApp</p>
+
+    <div class="qr-container" id="qrContainer">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="status aguardando" id="statusBadge">
+      <span class="dot"></span>
+      <span id="statusTexto">Iniciando conexão...</span>
+    </div>
+
+    <div class="instrucoes">
+      <strong>Como conectar:</strong>
+      <ol>
+        <li>Abra o WhatsApp no celular que vai ser o bot</li>
+        <li>Toque em Mais opções (⋮) → Aparelhos conectados</li>
+        <li>Toque em "Conectar um aparelho"</li>
+        <li>Aponte a câmera para o QR Code acima</li>
+      </ol>
+    </div>
+  </div>
+
+<script>
+  const qrContainer = document.getElementById('qrContainer');
+  const statusBadge = document.getElementById('statusBadge');
+  const statusTexto = document.getElementById('statusTexto');
+
+  const TEXTOS_STATUS = {
+    aguardando: 'Aguardando leitura do QR Code',
+    conectado: 'Conectado ao WhatsApp',
+    desconectado: 'Conexão caiu. Reconectando...',
+    deslogado: 'Sessão encerrada no celular. Gerando novo QR Code...'
+  };
+
+  function setStatus(status) {
+    statusBadge.className = 'status ' + (TEXTOS_STATUS[status] ? status : 'desconectado');
+    statusTexto.textContent = TEXTOS_STATUS[status] || 'Status desconhecido';
+  }
+
+  async function atualizar() {
+    try {
+      const resp = await fetch('/status', { cache: 'no-store' });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const dados = await resp.json();
+
+      setStatus(dados.status);
+
+      if (dados.status === 'conectado') {
+        qrContainer.innerHTML = '<div class="check">✅</div>';
+      } else if (dados.qr && dados.qr.startsWith('data:image/')) {
+        const img = document.createElement('img');
+        img.src = dados.qr;
+        img.alt = 'QR Code do WhatsApp';
+        qrContainer.replaceChildren(img);
+      } else {
+        qrContainer.innerHTML = '<div class="spinner"></div>';
+      }
+    } catch (erro) {
+      statusBadge.className = 'status desconectado';
+      statusTexto.textContent = 'Sem resposta do bot. Confira se o node bot.js está rodando.';
+    }
+  }
+
+  atualizar();
+  setInterval(atualizar, 3000);
+</script>
+</body>
+</html>

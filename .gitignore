@@ -1,0 +1,13 @@
+# Dependências (instale com npm install)
+node_modules/
+
+# Sessão do WhatsApp — NUNCA enviar para o GitHub
+auth/
+
+# Configurações locais (senhas, números)
+.env
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log

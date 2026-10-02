@@ -1,0 +1,30 @@
+{
+  "06843858481": {
+    "nome": "José Luiz",
+    "codigo": "0001",
+    "entregas": [
+      { "data": "2026-09-08", "toneladas": 40.0, "atr": 140.00 },
+      { "data": "2026-09-01", "toneladas": 35.5, "atr": 137.80 }
+    ]
+  },
+  "52998224725": {
+    "nome": "João Silva",
+    "codigo": "0452",
+    "entregas": [
+      { "data": "2026-08-28", "toneladas": 38.1, "atr": 135.90 },
+      { "data": "2026-09-05", "toneladas": 42.3, "atr": 138.45 }
+    ]
+  },
+  "39053344705": {
+    "nome": "Maria Souza",
+    "codigo": "0891",
+    "entregas": [
+      { "data": "2026-09-06", "toneladas": "55,0", "atr": "141,20" }
+    ]
+  },
+  "11144477735": {
+    "nome": "Fornecedor Teste",
+    "codigo": "0002",
+    "entregas": []
+  }
+}
